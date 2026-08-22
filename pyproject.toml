@@ -1,0 +1,64 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "llm-prompt-lint"
+version = "0.1.0"
+description = "Lint LLM chat-completion prompts for cross-provider portability issues"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+authors = [
+    { name = "Nachiket Lele", email = "lelenachiket991@gmail.com" },
+]
+keywords = ["llm", "prompt-engineering", "linter", "openai", "anthropic", "portability"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Quality Assurance",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.16",
+    "mypy>=1.10",
+]
+
+[project.scripts]
+llm-prompt-lint = "llm_prompt_lint.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/nac7/llm-prompt-lint"
+Repository = "https://github.com/nac7/llm-prompt-lint"
+Issues = "https://github.com/nac7/llm-prompt-lint/issues"
+Changelog = "https://github.com/nac7/llm-prompt-lint/blob/main/CHANGELOG.md"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/llm_prompt_lint"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B"]
+
+[tool.mypy]
+python_version = "3.10"
+ignore_missing_imports = true
+files = ["src/llm_prompt_lint"]

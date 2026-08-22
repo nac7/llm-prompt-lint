@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "llm-prompt-lint: Lint LLM chat-completion prompts for cross-provider portability issues"
+version: 0.1.0
+date-released: "2026-08-22"
+authors:
+  - family-names: Lele
+    given-names: Nachiket
+    email: lelenachiket991@gmail.com
+license: MIT
+repository-code: "https://github.com/nac7/llm-prompt-lint"
+url: "https://github.com/nac7/llm-prompt-lint"
+keywords:
+  - llm
+  - prompt-engineering
+  - linter
+  - openai
+  - anthropic
+  - portability
