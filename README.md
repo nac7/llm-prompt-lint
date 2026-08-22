@@ -1,6 +1,7 @@
 # prompt-portability
 
 [![CI](https://github.com/nac7/prompt-portability/actions/workflows/ci.yml/badge.svg)](https://github.com/nac7/prompt-portability/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/prompt-portability.svg)](https://pypi.org/project/prompt-portability/)
 
 Lint LLM chat-completion prompts for cross-provider portability issues.
 
