@@ -23,20 +23,34 @@ llm-prompt-lint check prompts/*.json
 Exits non-zero if any finding is error-severity, so it's usable as a CI gate.
 Add `--json` for machine-readable output.
 
+`check` only detects issues. To resolve the ones that have an unambiguous,
+lossless rewrite -- rather than requiring a human judgment call -- run:
+
+```bash
+llm-prompt-lint fix prompts/*.json
+```
+
+`fix` rewrites the file(s) in place and prints what changed, followed by
+whatever findings remain (still exits non-zero if any of those are
+error-severity). Add `--dry-run` to preview without writing.
+
 ## What it checks (v0.1.0)
 
-| Rule | Severity | Catches |
-|---|---|---|
-| `system-prompt/not-first` | error | A `system`-role message appears mid-conversation instead of first/dedicated |
-| `system-prompt/multiple` | warning | More than one inline system-role message |
-| `system-prompt/empty` | warning | A present-but-blank system prompt |
-| `stop-sequences` | error | More than 4 stop sequences (OpenAI's hard limit) |
-| `temperature-range` | warning | `temperature > 1.0` (valid on OpenAI's 0-2 scale, out of range elsewhere) |
-| `hardcoded-provider-reference` | warning | Prompt text says "you are ChatGPT/Claude/Gemini" etc. |
-| `leaked-special-tokens` | error | Literal `<\|im_start\|>`, `[INST]`, `<<SYS>>`, `<start_of_turn>` in message content |
-| `unsupported-role/legacy-function` | warning | OpenAI's deprecated `function` role instead of `tool` |
-| `unsupported-role` | error | A message role outside `{user, assistant, tool}` |
-| `json-mode-missing-hint` | warning | `response_format: json_object` with no message mentioning "json" |
+| Rule | Severity | Catches | `fix`? |
+|---|---|---|---|
+| `system-prompt/not-first` | error | A `system`-role message appears mid-conversation instead of first/dedicated | yes -- merged into the leading/dedicated system field |
+| `system-prompt/multiple` | warning | More than one inline system-role message | yes -- merged (nothing dropped) |
+| `system-prompt/empty` | warning | A present-but-blank system prompt | yes -- removed |
+| `stop-sequences` | error | More than 4 stop sequences (OpenAI's hard limit) | yes -- truncated to 4, order-preserved |
+| `temperature-range` | warning | `temperature > 1.0` (valid on OpenAI's 0-2 scale, out of range elsewhere) | no -- clamping changes sampling behavior |
+| `hardcoded-provider-reference` | warning | Prompt text says "you are ChatGPT/Claude/Gemini" etc. | no -- rewriting authored text is a content decision |
+| `leaked-special-tokens` | error | Literal `<\|im_start\|>`, `[INST]`, `<<SYS>>`, `<start_of_turn>` in message content | yes -- stripped |
+| `unsupported-role/legacy-function` | warning | OpenAI's deprecated `function` role instead of `tool` | partial -- renamed, but you must add a `tool_call_id` by hand |
+| `unsupported-role` | error | A message role outside `{user, assistant, tool}` | no -- no way to infer the intended portable role |
+| `json-mode-missing-hint` | warning | `response_format: json_object` with no message mentioning "json" | no -- injecting text changes the actual instructions |
+
+`fix` only touches the rows marked `yes`/`partial` above -- see
+[Auto-fixing](#auto-fixing-fix) for why the rest are left to a human.
 
 ## Input format
 
@@ -58,11 +72,31 @@ applies to all three.
 }
 ```
 
+## Auto-fixing (`fix`)
+
+Only findings with an unambiguous, lossless rewrite are auto-fixed --
+deliberately not all 10 rules. Merging duplicate system messages, dropping
+an empty one, stripping a leaked template token, and truncating excess stop
+sequences are mechanical: nothing about the fix depends on guessing what
+the prompt author meant. Renaming OpenAI's legacy `function` role to `tool`
+is applied but flagged for manual follow-up, since a valid `tool` message
+also needs a `tool_call_id` that can't be inferred.
+
+The other three rules are left alone on purpose: clamping `temperature`
+changes actual sampling behavior, rewriting "you are ChatGPT" requires
+knowing what the author intended instead, and injecting the word "json"
+to satisfy OpenAI's json-mode requirement changes the model's actual
+instructions. Those are content decisions, not syntax fixes -- `fix`
+reports them as remaining issues rather than guessing.
+
 ## Library API
 
 ```python
 from llm_prompt_lint.parsers import detect_and_parse
 from llm_prompt_lint.linter import lint
+from llm_prompt_lint.fixers import apply_fixes
+
+fixes = apply_fixes(request_body, path="prompts/greet.json")  # mutates in place
 
 doc = detect_and_parse(request_body, source_path="prompts/greet.json")
 report = lint(doc)
@@ -81,8 +115,9 @@ mypy
 ## Status
 
 v0.1.0. OpenAI + Anthropic + Gemini request parsers; 10 portability rules;
-JSON/table CLI output; CI across 3 OSes x 3 Python versions plus a
-lint/type-check job.
+`check` (detect) and `fix` (auto-fix the 4-and-a-half safely-fixable ones,
+`--dry-run` supported); JSON/table CLI output; CI across 3 OSes x 3 Python
+versions plus a lint/type-check job. 73 tests passing.
 
 Known gap: rules operate on a single request snapshot, not a stored prompt
 template with variable substitution.

@@ -13,6 +13,14 @@ class Finding:
 
 
 @dataclass(frozen=True)
+class Fix:
+    rule_id: str
+    message: str
+    path: str
+    needs_manual_followup: bool = False
+
+
+@dataclass(frozen=True)
 class LintReport:
     findings: list[Finding] = field(default_factory=list)
 

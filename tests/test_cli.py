@@ -67,3 +67,57 @@ def test_check_reports_non_object_json_cleanly(tmp_path):
     path = _write(tmp_path, "list.json", ["not", "a", "request", "body"])
     with pytest.raises(SystemExit, match="not a JSON object"):
         main(["check", str(path)])
+
+
+def test_fix_writes_corrected_file_and_reports_remaining_issues(tmp_path, capsys):
+    path = _write(
+        tmp_path,
+        "messy.json",
+        {
+            "messages": [
+                {"role": "user", "content": "hi"},
+                {"role": "system", "content": "be terse"},
+            ],
+            "stop": ["a", "b", "c", "d", "e"],
+            "temperature": 1.9,
+        },
+    )
+    exit_code = main(["fix", path])
+    out = capsys.readouterr().out
+    assert "Applied" in out
+    assert "system-prompt/merged" in out
+    assert "stop-sequences" in out
+    # temperature-range has no fixer, so it must survive into "remaining issues".
+    assert "temperature-range" in out
+    assert exit_code == 0  # remaining temperature-range finding is a warning, not an error
+
+    with open(path, encoding="utf-8") as f:
+        fixed = json.load(f)
+    assert fixed["messages"][0] == {"role": "system", "content": "be terse"}
+    assert fixed["stop"] == ["a", "b", "c", "d"]
+
+
+def test_fix_dry_run_does_not_write_the_file(tmp_path, capsys):
+    path = _write(tmp_path, "messy.json", {"messages": [], "stop": ["a", "b", "c", "d", "e"]})
+    with open(path, encoding="utf-8") as f:
+        original_text = f.read()
+
+    main(["fix", path, "--dry-run"])
+    out = capsys.readouterr().out
+    assert "Would apply" in out
+
+    with open(path, encoding="utf-8") as f:
+        assert f.read() == original_text
+
+
+def test_fix_reports_clean_file_with_no_fixes(tmp_path, capsys):
+    path = _write(
+        tmp_path,
+        "clean.json",
+        {"messages": [{"role": "user", "content": "hi"}]},
+    )
+    exit_code = main(["fix", path])
+    out = capsys.readouterr().out
+    assert "Applied 0 fix(es)" in out
+    assert "No remaining portability issues." in out
+    assert exit_code == 0
