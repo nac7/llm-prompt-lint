@@ -25,11 +25,11 @@ def _load_request(path: str) -> dict:
         with open(path, encoding="utf-8") as f:
             data = json.load(f)
     except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
-        raise SystemExit(f"llm-prompt-lint: could not read {path} as JSON: {exc}") from exc
+        raise SystemExit(f"prompt-portability: could not read {path} as JSON: {exc}") from exc
 
     if not isinstance(data, dict):
         raise SystemExit(
-            f"llm-prompt-lint: {path} is not a JSON object -- expected an OpenAI, "
+            f"prompt-portability: {path} is not a JSON object -- expected an OpenAI, "
             "Anthropic, or Gemini chat-completion request body"
         )
     return data
@@ -106,7 +106,7 @@ def _add_ignore_args(parser: argparse.ArgumentParser) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="llm-prompt-lint")
+    parser = argparse.ArgumentParser(prog="prompt-portability")
     sub = parser.add_subparsers(dest="command", required=True)
 
     check_p = sub.add_parser(

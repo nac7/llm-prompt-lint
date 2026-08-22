@@ -1,12 +1,12 @@
-# llm-prompt-lint
+# prompt-portability
 
-[![CI](https://github.com/nac7/llm-prompt-lint/actions/workflows/ci.yml/badge.svg)](https://github.com/nac7/llm-prompt-lint/actions/workflows/ci.yml)
+[![CI](https://github.com/nac7/prompt-portability/actions/workflows/ci.yml/badge.svg)](https://github.com/nac7/prompt-portability/actions/workflows/ci.yml)
 
 Lint LLM chat-completion prompts for cross-provider portability issues.
 
 A prompt authored and tuned against one provider's API often breaks --
 silently, or with a rejected request -- when the same request body is sent
-to another. `llm-prompt-lint` reads OpenAI- or Anthropic-shaped request JSON
+to another. `prompt-portability` reads OpenAI- or Anthropic-shaped request JSON
 and flags the assumptions that don't travel: system-prompt placement,
 provider-specific limits (stop-sequence counts, temperature ranges), leaked
 chat-template tokens from a different model family, deprecated/nonstandard
@@ -15,9 +15,9 @@ message roles, and JSON-mode footguns.
 ## Quickstart
 
 ```bash
-pip install llm-prompt-lint
+pip install prompt-portability
 
-llm-prompt-lint check prompts/*.json
+prompt-portability check prompts/*.json
 ```
 
 Exits non-zero if any finding is error-severity, so it's usable as a CI gate.
@@ -27,7 +27,7 @@ Add `--json` for machine-readable output.
 lossless rewrite -- rather than requiring a human judgment call -- run:
 
 ```bash
-llm-prompt-lint fix prompts/*.json
+prompt-portability fix prompts/*.json
 ```
 
 `fix` rewrites the file(s) in place and prints what changed, followed by
@@ -40,10 +40,10 @@ A known, intentional case (e.g. a deliberately high `temperature`) doesn't
 have to fail CI. Suppress it per-invocation:
 
 ```bash
-llm-prompt-lint check prompts/*.json --ignore temperature-range
+prompt-portability check prompts/*.json --ignore temperature-range
 ```
 
-or check it in so the whole team gets it, via a `.llm-prompt-lint.json` file
+or check it in so the whole team gets it, via a `.prompt-portability.json` file
 (looked up in the current directory by default; `--config` to point
 elsewhere) next to where you run the CLI:
 
@@ -140,7 +140,7 @@ mypy
 
 v0.1.0. OpenAI + Anthropic + Gemini request parsers; 10 portability rules;
 `check` (detect) and `fix` (auto-fix the 4-and-a-half safely-fixable ones,
-`--dry-run` supported); per-rule suppression (`--ignore`, `.llm-prompt-lint.json`);
+`--dry-run` supported); per-rule suppression (`--ignore`, `.prompt-portability.json`);
 JSON/table CLI output; CI across 3 OSes x 3 Python versions plus a
 lint/type-check job. 86 tests passing.
 

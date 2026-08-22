@@ -10,26 +10,26 @@ def test_missing_config_file_returns_empty_list(tmp_path):
 
 
 def test_loads_ignore_list_from_config_file(tmp_path):
-    path = tmp_path / ".llm-prompt-lint.json"
+    path = tmp_path / ".prompt-portability.json"
     path.write_text(json.dumps({"ignore": ["temperature-range", "system-prompt"]}))
     assert load_ignore_config(str(path)) == ["temperature-range", "system-prompt"]
 
 
 def test_malformed_config_file_raises_clean_error(tmp_path):
-    path = tmp_path / ".llm-prompt-lint.json"
+    path = tmp_path / ".prompt-portability.json"
     path.write_text("{not valid json")
     with pytest.raises(SystemExit, match="could not read"):
         load_ignore_config(str(path))
 
 
 def test_config_missing_ignore_key_defaults_to_empty_list(tmp_path):
-    path = tmp_path / ".llm-prompt-lint.json"
+    path = tmp_path / ".prompt-portability.json"
     path.write_text(json.dumps({"some_future_key": True}))
     assert load_ignore_config(str(path)) == []
 
 
 def test_config_with_non_list_ignore_raises_clean_error(tmp_path):
-    path = tmp_path / ".llm-prompt-lint.json"
+    path = tmp_path / ".prompt-portability.json"
     path.write_text(json.dumps({"ignore": "not-a-list"}))
     with pytest.raises(SystemExit, match='"ignore"'):
         load_ignore_config(str(path))

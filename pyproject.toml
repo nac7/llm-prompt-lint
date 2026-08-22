@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "llm-prompt-lint"
+name = "prompt-portability"
 version = "0.1.0"
 description = "Lint LLM chat-completion prompts for cross-provider portability issues"
 readme = "README.md"
@@ -37,13 +37,13 @@ dev = [
 ]
 
 [project.scripts]
-llm-prompt-lint = "llm_prompt_lint.cli:main"
+prompt-portability = "llm_prompt_lint.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/nac7/llm-prompt-lint"
-Repository = "https://github.com/nac7/llm-prompt-lint"
-Issues = "https://github.com/nac7/llm-prompt-lint/issues"
-Changelog = "https://github.com/nac7/llm-prompt-lint/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/nac7/prompt-portability"
+Repository = "https://github.com/nac7/prompt-portability"
+Issues = "https://github.com/nac7/prompt-portability/issues"
+Changelog = "https://github.com/nac7/prompt-portability/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/llm_prompt_lint"]

@@ -100,7 +100,7 @@ def test_check_ignore_flag_family_prefix(tmp_path, capsys):
 
 
 def test_check_config_file_suppresses_a_rule(tmp_path, capsys):
-    config_path = tmp_path / ".llm-prompt-lint.json"
+    config_path = tmp_path / ".prompt-portability.json"
     config_path.write_text(json.dumps({"ignore": ["stop-sequences"]}))
     path = _write(tmp_path, "bad.json", {"messages": [], "stop": ["a", "b", "c", "d", "e"]})
 
@@ -111,7 +111,7 @@ def test_check_config_file_suppresses_a_rule(tmp_path, capsys):
 
 
 def test_check_ignore_flag_and_config_file_combine(tmp_path, capsys):
-    config_path = tmp_path / ".llm-prompt-lint.json"
+    config_path = tmp_path / ".prompt-portability.json"
     config_path.write_text(json.dumps({"ignore": ["stop-sequences"]}))
     path = _write(
         tmp_path,

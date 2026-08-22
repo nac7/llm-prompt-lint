@@ -24,7 +24,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install llm-prompt-lint with dev extras
+      - name: Install prompt-portability with dev extras
         run: pip install -e ".[dev]"
 
       - name: Run tests
@@ -41,7 +41,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install llm-prompt-lint with dev extras
+      - name: Install prompt-portability with dev extras
         run: pip install -e ".[dev]"
 
       - name: Ruff

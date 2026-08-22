@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import os
 
-DEFAULT_CONFIG_PATH = ".llm-prompt-lint.json"
+DEFAULT_CONFIG_PATH = ".prompt-portability.json"
 
 
 def load_ignore_config(config_path: str = DEFAULT_CONFIG_PATH) -> list[str]:
@@ -21,11 +21,13 @@ def load_ignore_config(config_path: str = DEFAULT_CONFIG_PATH) -> list[str]:
         with open(config_path, encoding="utf-8") as f:
             data = json.load(f)
     except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
-        raise SystemExit(f"llm-prompt-lint: could not read {config_path}: {exc}") from exc
+        raise SystemExit(f"prompt-portability: could not read {config_path}: {exc}") from exc
 
     ignore = data.get("ignore", []) if isinstance(data, dict) else None
     if not isinstance(ignore, list) or not all(isinstance(x, str) for x in ignore):
-        raise SystemExit(f'llm-prompt-lint: {config_path} must be {{"ignore": [<rule-id>, ...]}}')
+        raise SystemExit(
+            f'prompt-portability: {config_path} must be {{"ignore": [<rule-id>, ...]}}'
+        )
     return ignore
 
 
