@@ -41,10 +41,11 @@ Add `--json` for machine-readable output.
 ## Input format
 
 Point `check` at JSON files shaped like an OpenAI Chat Completions request
-body or an Anthropic Messages API request body -- the format is
-auto-detected per file (`llm_prompt_lint.parsers.detect_and_parse`). Both
-shapes are normalized to one provider-agnostic model before rules run, so
-every rule applies to both.
+body, an Anthropic Messages API request body, or a Google Gemini
+`generateContent` request body -- the format is auto-detected per file
+(`llm_prompt_lint.parsers.detect_and_parse`). All three shapes are
+normalized to one provider-agnostic model before rules run, so every rule
+applies to all three.
 
 ```json
 {
@@ -79,11 +80,12 @@ mypy
 
 ## Status
 
-v0.1.0. OpenAI + Anthropic request parsers; 10 portability rules; JSON/table
-CLI output; CI across 3 OSes x 3 Python versions plus a lint/type-check job.
+v0.1.0. OpenAI + Anthropic + Gemini request parsers; 10 portability rules;
+JSON/table CLI output; CI across 3 OSes x 3 Python versions plus a
+lint/type-check job.
 
-Known gaps: no Google Gemini parser yet; rules operate on a single request
-snapshot, not a stored prompt template with variable substitution.
+Known gap: rules operate on a single request snapshot, not a stored prompt
+template with variable substitution.
 
 ## License
 

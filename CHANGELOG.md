@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## [Unreleased]
+
+### Added
+- Google Gemini `generateContent` request parser (`llm_prompt_lint.parsers.gemini`), auto-detected via the `contents` field. Normalizes Gemini's `model`/`function` roles to the portable `assistant`/`tool` roles, and `generationConfig` (temperature, topP, stopSequences, responseMimeType) into the shared `PromptDoc` fields, so all 10 rules apply to it unchanged.
+
+### Fixed
+- A JSON file that parses but isn't an object (e.g. a bare array) used to crash with a raw `AttributeError`; `check` now exits cleanly naming the file.
+
 ## [0.1.0] - 2026-08-22
 
 Initial release.

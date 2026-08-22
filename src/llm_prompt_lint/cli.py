@@ -27,6 +27,12 @@ def _check(args: argparse.Namespace) -> int:
         except (OSError, json.JSONDecodeError) as exc:
             raise SystemExit(f"llm-prompt-lint: could not read {path} as JSON: {exc}") from exc
 
+        if not isinstance(data, dict):
+            raise SystemExit(
+                f"llm-prompt-lint: {path} is not a JSON object -- expected an OpenAI, "
+                "Anthropic, or Gemini chat-completion request body"
+            )
+
         doc = detect_and_parse(data, source_path=path)
         all_findings.extend(lint(doc).findings)
 

@@ -61,3 +61,9 @@ def test_check_reports_unreadable_file_cleanly(tmp_path):
     path.write_text("{not valid json")
     with pytest.raises(SystemExit, match="could not read"):
         main(["check", str(path)])
+
+
+def test_check_reports_non_object_json_cleanly(tmp_path):
+    path = _write(tmp_path, "list.json", ["not", "a", "request", "body"])
+    with pytest.raises(SystemExit, match="not a JSON object"):
+        main(["check", str(path)])

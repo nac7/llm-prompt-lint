@@ -17,3 +17,9 @@ def test_defaults_to_openai():
     data = {"messages": [{"role": "system", "content": "Hi"}, {"role": "user", "content": "x"}]}
     doc = detect_and_parse(data)
     assert doc.system == "Hi"
+
+
+def test_detects_gemini_via_contents():
+    data = {"contents": [{"role": "model", "parts": [{"text": "hi"}]}]}
+    doc = detect_and_parse(data)
+    assert doc.messages[0].role == "assistant"  # would be "model" if misrouted
