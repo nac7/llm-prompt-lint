@@ -69,6 +69,70 @@ def test_check_reports_non_object_json_cleanly(tmp_path):
         main(["check", str(path)])
 
 
+def test_check_reports_non_utf8_file_cleanly(tmp_path):
+    path = tmp_path / "bad_encoding.json"
+    path.write_bytes(b"\xff\xfe\x00{not valid utf-8")
+    with pytest.raises(SystemExit, match="could not read"):
+        main(["check", str(path)])
+
+
+def test_check_ignore_flag_suppresses_a_rule(tmp_path, capsys):
+    path = _write(tmp_path, "bad.json", {"messages": [], "stop": ["a", "b", "c", "d", "e"]})
+    exit_code = main(["check", path, "--ignore", "stop-sequences"])
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "No portability issues found" in out
+
+
+def test_check_ignore_flag_family_prefix(tmp_path, capsys):
+    # A leading-but-blank system message only trips system-prompt/empty --
+    # unlike an out-of-position one, it never touches doc.messages, so this
+    # isolates the family-prefix match from unsupported-role's overlap.
+    path = _write(
+        tmp_path,
+        "bad.json",
+        {"messages": [{"role": "system", "content": "   "}, {"role": "user", "content": "hi"}]},
+    )
+    exit_code = main(["check", path, "--ignore", "system-prompt"])
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "system-prompt" not in out
+
+
+def test_check_config_file_suppresses_a_rule(tmp_path, capsys):
+    config_path = tmp_path / ".llm-prompt-lint.json"
+    config_path.write_text(json.dumps({"ignore": ["stop-sequences"]}))
+    path = _write(tmp_path, "bad.json", {"messages": [], "stop": ["a", "b", "c", "d", "e"]})
+
+    exit_code = main(["check", path, "--config", str(config_path)])
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "No portability issues found" in out
+
+
+def test_check_ignore_flag_and_config_file_combine(tmp_path, capsys):
+    config_path = tmp_path / ".llm-prompt-lint.json"
+    config_path.write_text(json.dumps({"ignore": ["stop-sequences"]}))
+    path = _write(
+        tmp_path,
+        "bad.json",
+        {"messages": [], "stop": ["a", "b", "c", "d", "e"], "temperature": 1.9},
+    )
+
+    exit_code = main(["check", path, "--config", str(config_path), "--ignore", "temperature-range"])
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "No portability issues found" in out
+
+
+def test_fix_ignore_flag_suppresses_remaining_finding(tmp_path, capsys):
+    path = _write(tmp_path, "bad.json", {"messages": [], "temperature": 1.9})
+    exit_code = main(["fix", path, "--ignore", "temperature-range"])
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "No remaining portability issues." in out
+
+
 def test_fix_writes_corrected_file_and_reports_remaining_issues(tmp_path, capsys):
     path = _write(
         tmp_path,

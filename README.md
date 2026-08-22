@@ -34,6 +34,30 @@ llm-prompt-lint fix prompts/*.json
 whatever findings remain (still exits non-zero if any of those are
 error-severity). Add `--dry-run` to preview without writing.
 
+## Suppressing a rule
+
+A known, intentional case (e.g. a deliberately high `temperature`) doesn't
+have to fail CI. Suppress it per-invocation:
+
+```bash
+llm-prompt-lint check prompts/*.json --ignore temperature-range
+```
+
+or check it in so the whole team gets it, via a `.llm-prompt-lint.json` file
+(looked up in the current directory by default; `--config` to point
+elsewhere) next to where you run the CLI:
+
+```json
+{"ignore": ["temperature-range"]}
+```
+
+`--ignore` is repeatable and stacks with the config file. A bare family
+name (e.g. `"system-prompt"`) suppresses every rule in that family
+(`system-prompt/empty`, `system-prompt/multiple`, etc). Suppression isn't
+embedded in the request JSON itself, since those files are meant to double
+as real API request bodies -- an extra top-level key risks a provider that
+rejects unknown fields.
+
 ## What it checks (v0.1.0)
 
 | Rule | Severity | Catches | `fix`? |
@@ -116,8 +140,9 @@ mypy
 
 v0.1.0. OpenAI + Anthropic + Gemini request parsers; 10 portability rules;
 `check` (detect) and `fix` (auto-fix the 4-and-a-half safely-fixable ones,
-`--dry-run` supported); JSON/table CLI output; CI across 3 OSes x 3 Python
-versions plus a lint/type-check job. 73 tests passing.
+`--dry-run` supported); per-rule suppression (`--ignore`, `.llm-prompt-lint.json`);
+JSON/table CLI output; CI across 3 OSes x 3 Python versions plus a
+lint/type-check job. 86 tests passing.
 
 Known gap: rules operate on a single request snapshot, not a stored prompt
 template with variable substitution.
