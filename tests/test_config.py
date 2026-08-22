@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from llm_prompt_lint.config import is_ignored, load_ignore_config
+from llm_prompt_lint.config import is_ignored, load_ignore_config, validate_ignore
 
 
 def test_missing_config_file_returns_empty_list(tmp_path):
@@ -43,4 +43,22 @@ def test_is_ignored_exact_match():
 def test_is_ignored_family_prefix_match():
     assert is_ignored("system-prompt/empty", ["system-prompt"]) is True
     assert is_ignored("system-prompt/multiple", ["system-prompt"]) is True
+
+
+def test_validate_ignore_accepts_known_families():
+    validate_ignore(["system-prompt", "temperature-range"])  # must not raise
+
+
+def test_validate_ignore_accepts_known_full_rule_ids():
+    validate_ignore(["system-prompt/empty", "unsupported-role/legacy-function"])  # no raise
+
+
+def test_validate_ignore_rejects_typo():
+    with pytest.raises(SystemExit, match="unknown --ignore rule"):
+        validate_ignore(["sytem-prompt"])
+
+
+def test_validate_ignore_rejects_entirely_unknown_family():
+    with pytest.raises(SystemExit, match="unknown --ignore rule"):
+        validate_ignore(["made-up-rule/whatever"])
     assert is_ignored("system-promptx/empty", ["system-prompt"]) is False

@@ -133,6 +133,12 @@ def test_fix_ignore_flag_suppresses_remaining_finding(tmp_path, capsys):
     assert "No remaining portability issues." in out
 
 
+def test_check_rejects_unknown_ignore_rule(tmp_path):
+    path = _write(tmp_path, "clean.json", {"messages": [{"role": "user", "content": "hi"}]})
+    with pytest.raises(SystemExit, match="unknown --ignore rule"):
+        main(["check", path, "--ignore", "sytem-prompt"])
+
+
 def test_fix_writes_corrected_file_and_reports_remaining_issues(tmp_path, capsys):
     path = _write(
         tmp_path,

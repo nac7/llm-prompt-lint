@@ -59,6 +59,10 @@ embedded in the request JSON itself, since those files are meant to double
 as real API request bodies -- an extra top-level key risks a provider that
 rejects unknown fields.
 
+An unrecognized rule name (a typo, e.g. `--ignore sytem-prompt`) is a hard
+error rather than a silent no-op -- a suppression list you're relying on in
+CI shouldn't fail quietly.
+
 ## What it checks (v0.1.0)
 
 | Rule | Severity | Catches | `fix`? |
@@ -143,7 +147,7 @@ v0.1.0. OpenAI + Anthropic + Gemini request parsers; 10 portability rules;
 `check` (detect) and `fix` (auto-fix the 4-and-a-half safely-fixable ones,
 `--dry-run` supported); per-rule suppression (`--ignore`, `.prompt-portability.json`);
 JSON/table CLI output; CI across 3 OSes x 3 Python versions plus a
-lint/type-check job. 86 tests passing.
+lint/type-check job. 91 tests passing.
 
 Known gap: rules operate on a single request snapshot, not a stored prompt
 template with variable substitution.

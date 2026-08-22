@@ -5,7 +5,12 @@ import glob
 import json
 import sys
 
-from llm_prompt_lint.config import DEFAULT_CONFIG_PATH, is_ignored, load_ignore_config
+from llm_prompt_lint.config import (
+    DEFAULT_CONFIG_PATH,
+    is_ignored,
+    load_ignore_config,
+    validate_ignore,
+)
 from llm_prompt_lint.fixers import apply_fixes
 from llm_prompt_lint.linter import lint
 from llm_prompt_lint.parsers import detect_and_parse
@@ -36,7 +41,9 @@ def _load_request(path: str) -> dict:
 
 
 def _resolve_ignore(args: argparse.Namespace) -> list[str]:
-    return load_ignore_config(args.config) + (args.ignore or [])
+    ignore = load_ignore_config(args.config) + (args.ignore or [])
+    validate_ignore(ignore)
+    return ignore
 
 
 def _check(args: argparse.Namespace) -> int:

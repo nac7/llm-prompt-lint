@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 import os
 
+from llm_prompt_lint.rules import KNOWN_RULE_FAMILIES
+
 DEFAULT_CONFIG_PATH = ".prompt-portability.json"
 
 
@@ -36,3 +38,16 @@ def is_ignored(rule_id: str, ignore: list[str]) -> bool:
     entry -- either exactly, or as a family prefix ("system-prompt" ignores
     every "system-prompt/*" rule)."""
     return any(rule_id == pattern or rule_id.startswith(f"{pattern}/") for pattern in ignore)
+
+
+def validate_ignore(ignore: list[str]) -> None:
+    """Reject an --ignore/config entry that doesn't match any real rule
+    family. A typo here (e.g. "sytem-prompt") would otherwise match nothing
+    and silently suppress zero findings -- the opposite of what a
+    suppression list meant to be trusted in CI should ever do."""
+    unknown = [entry for entry in ignore if entry.split("/")[0] not in KNOWN_RULE_FAMILIES]
+    if unknown:
+        known = ", ".join(sorted(KNOWN_RULE_FAMILIES))
+        raise SystemExit(
+            f"prompt-portability: unknown --ignore rule(s) {unknown!r} -- known rules: {known}"
+        )
